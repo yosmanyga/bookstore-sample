@@ -1,0 +1,43 @@
+enum ItemType {
+  BOOK
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../../node_modules/.prisma/client"
+}
+
+model Book {
+  @@map("books")
+  id               Int     @id @default(autoincrement())
+  title            String
+  author           String
+  description      String
+  publication_year Int
+  isbn             String
+  favorites        Favorite[]
+}
+
+model User {
+  @@map("users")
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  password  String
+  salt      String
+  is_admin  Boolean    @default(false)
+  favorites Favorite[]
+}
+
+model Favorite {
+  @@map("favorites")
+  @@id([userId, bookId])
+  userId Int @map("user_id")
+  bookId Int @map("book_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book   Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}

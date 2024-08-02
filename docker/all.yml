@@ -1,0 +1,69 @@
+services:
+  frontend:
+    image: node:22-alpine
+    container_name: bookstore_frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ../:/app
+    depends_on:
+      backend:
+        # Wait for the backend before starting the frontend
+        condition: service_healthy
+    working_dir: /app
+    command: "npx nx run bookstore-frontend:serve -- --host=0.0.0.0 --port=80"
+
+  backend:
+    build:
+      context: ../
+      dockerfile: ./docker/backend/Dockerfile
+    container_name: bookstore_backend
+    ports:
+      - "3333:3333"
+    volumes:
+      - ../:/app
+    environment:
+      - NODE_ENV=development
+      - PORT=3333
+    healthcheck:
+      test: "node -e 'require(\"http\").get(\"http://localhost:3333/health\", res => { if (res.statusCode === 200) { process.exit(0) } else { process.exit(1) } }).on(\"error\", () => { process.exit(1) })'"
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 300
+    working_dir: /app
+
+  database:
+    image: mysql
+    container_name: bookstore_database
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../var/db:/var/lib/mysql
+      - ./mysql/1_structure.sql:/docker-entrypoint-initdb.d/1_structure.sql
+      - ./mysql/2_data.sql:/docker-entrypoint-initdb.d/2_data.sql
+    environment:
+      MYSQL_USER: "bookstore"
+      MYSQL_PASSWORD: "b00kst0r3"
+      MYSQL_DATABASE: "bookstore"
+      MYSQL_ROOT_PASSWORD: "r00t"
+
+#  database:
+#    image: mongo:7.0
+#    container_name: bookstore_database
+#    ports:
+#      - "27017:27017"
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+#    healthcheck:
+#      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+#      interval: 5s
+#      timeout: 30s
+#      start_period: 0s
+#      start_interval: 1s
+#      retries: 30
+#    volumes:
+#      - ../var/db:/data/db
+#    # Mongo as replica to make it work with Prisma
+#    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]

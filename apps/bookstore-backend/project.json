@@ -1,0 +1,53 @@
+{
+  "name": "bookstore-backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/bookstore-backend/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "bookstore-backend:build",
+        "runBuildTargetDependencies": false,
+        "watch": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "bookstore-backend:build:development"
+        },
+        "production": {
+          "buildTarget": "bookstore-backend:build:production"
+        }
+      }
+    },
+    "prisma-generate": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "commands": [
+          "npx prisma generate --schema=src/prisma/schema.prisma"
+        ],
+        "cwd": "apps/bookstore-backend"
+      },
+      "configurations": {
+        "development": {}
+      }
+    },
+    "prisma-migrate": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "commands": [
+          "npx prisma migrate dev --schema=src/prisma/schema.prisma"
+        ],
+        "cwd": "apps/bookstore-backend"
+      },
+      "configurations": {
+        "development": {}
+      }
+    },
+  }
+}
