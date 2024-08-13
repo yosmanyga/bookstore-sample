@@ -1,7 +1,7 @@
 import {useContext} from "react";
 import {Avatar, Button, Container, Stack} from '@mui/material';
 
-import {Icon, icons, CredentialContext, useCredential} from "../core";
+import {CredentialContext, Icon, icons, useCredential} from "../core";
 
 const HeaderBlock = ({
   auth,

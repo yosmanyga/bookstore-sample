@@ -14,7 +14,7 @@ generator client {
 
 model Book {
   @@map("books")
-  id               Int     @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   title            String
   author           String
   description      String
@@ -36,8 +36,8 @@ model User {
 model Favorite {
   @@map("favorites")
   @@id([userId, bookId])
-  userId Int @map("user_id")
-  bookId Int @map("book_id")
+  userId Int  @map("user_id")
+  bookId Int  @map("book_id")
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   book   Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 }
