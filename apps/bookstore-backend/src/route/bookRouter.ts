@@ -2,7 +2,7 @@ import express, {NextFunction, Request, Response} from "express";
 import {param} from "express-validator";
 import {Prisma} from "@prisma/client";
 
-import {allErrorsMiddleware} from "../middleware/";
+import {adminAuthMiddleware, allErrorsMiddleware} from "../middleware/";
 import {createBook, deleteBook, getBook, getBooks, searchBooks, updateBook} from "../service/book";
 import {ValidationError} from "../error";
 
@@ -64,6 +64,8 @@ router.get(
 
 router.post(
   "/",
+  // Authorization handling
+  adminAuthMiddleware,
   async (
     req: Request<unknown, unknown, Prisma.BookCreateInput>,
     res: Response,
@@ -91,6 +93,8 @@ router.post(
 
 router.put(
   "/:id",
+  // Authorization handling
+  adminAuthMiddleware,
   // Parameter validation
   param('id').toInt(),
   // Logic processing
@@ -126,6 +130,8 @@ router.put(
 
 router.delete(
   "/:id",
+  // Authorization handling
+  adminAuthMiddleware,
   // Parameter validation
   param('id').toInt(),
   // Logic processing

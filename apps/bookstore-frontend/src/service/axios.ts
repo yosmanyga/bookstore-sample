@@ -1,22 +1,125 @@
-import axios from 'axios';
+import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
+import Secure from 'secure-ls';
 
-// TODO: Improve baseURL to use environment variables
+class AxiosInstance {
+  private readonly apiBase!: string;
+  private headers!: object;
 
-const instance = axios.create({
-  baseURL: 'http://localhost:3333'
-});
+  private instance!: typeof axios;
 
-// Intercept error
-instance.interceptors.response.use(
-  response => response,
-  error => {
+  constructor() {
+    // TODO: Improve baseURL to use environment variables
+    this.apiBase = 'http://localhost:3333'
+  }
 
-    if (!error.response || !error.response.data || !error.response.data.message) {
-      throw new Error("Request failed. Please try later");
+  withAuthentication = () => {
+    const secure = new Secure();
+
+    const token = secure.get('token');
+
+    if (!token) {
+      throw new Error('Token not found');
     }
 
-    throw new Error(error.response.data.message);
-  }
-);
+    this.headers = {
+      ...this.headers,
+      Authorization: `Bearer ${token}`,
+    };
 
-export default instance;
+    return this;
+  };
+
+  get = <T = unknown, R = AxiosResponse<T>, D = unknown>(
+    url: string,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> => {
+    const result = (this.instance
+      ? this.instance.get(url, config)
+      : this.instantiate().get(url, config)) as Promise<R>;
+
+    this.restoreHeaders();
+
+    return result;
+  }
+
+  post = <T = unknown, R = AxiosResponse<T>, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> => {
+    const result = (this.instance
+      ? this.instance.post(url, data, config)
+      : this.instantiate().post(url, data, config)) as Promise<R>;
+
+    this.restoreHeaders();
+
+    return result;
+  }
+
+
+  put = <T = unknown, R = AxiosResponse<T>, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> => {
+    const result = (this.instance
+      ? this.instance.put(url, data, config)
+      : this.instantiate().put(url, data, config)) as Promise<R>;
+
+    this.restoreHeaders();
+
+    return result;
+  }
+
+  delete = <T = unknown, R = AxiosResponse<T>, D = unknown>(
+    url: string,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> => {
+    const result = (this.instance
+      ? this.instance.delete(url, config)
+      : this.instantiate().delete(url, config)) as Promise<R>;
+
+    this.restoreHeaders();
+
+    return result;
+  }
+
+  private instantiate = () => {
+    const instance = axios.create({
+      baseURL: this.apiBase,
+      headers: this.headers,
+      responseType: 'json',
+      // transformResponse: (response) => {
+      //   if (!response) {
+      //     return response;
+      //   }
+      //
+      //   try {
+      //     return JSON.parse(response);
+      //   } catch (e) {
+      //     console.error(e);
+      //   }
+      // },
+    });
+
+    instance.interceptors.response.use(
+      response => response,
+      error => {
+
+        if (!error.response || !error.response.data || !error.response.data.message) {
+          throw new Error("Request failed. Please try later");
+        }
+
+        throw new Error(error.response.data.message);
+      }
+    );
+
+    return instance;
+  };
+
+  private restoreHeaders = () => {
+    this.headers = {};
+  }
+}
+
+export default new AxiosInstance();

@@ -1,4 +1,4 @@
-import {Prisma, Book} from "@prisma/client";
+import {Book, Prisma} from "@prisma/client";
 import prisma from "../../prisma/client";
 
 import {NotFoundError} from "../../error";

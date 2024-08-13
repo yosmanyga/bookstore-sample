@@ -1,5 +1,5 @@
 import {CredentialProvider} from "./core";
-import {ThemeWrapper, Routing} from "./layout";
+import {Routing, ThemeWrapper} from "./layout";
 
 export default () => {
   return <CredentialProvider>

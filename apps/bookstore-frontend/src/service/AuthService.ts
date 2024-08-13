@@ -6,10 +6,11 @@ const processLogin = async (
   username: UserUsernameType,
   password: UserPasswordType
 ) => {
-  const response = await axios.post('/auth/login', {
-    username: username,
-    password: password
-  });
+  const response = await axios
+    .post<string>('/auth/login', {
+      username: username,
+      password: password
+    });
 
   return response.data;
 }
@@ -23,10 +24,11 @@ const processRegistration = async (
     throw new Error('Passwords do not match');
   }
 
-  const response = await axios.post('/auth/registration', {
-    username: username,
-    password: password
-  });
+  const response = await axios
+    .post<string>('/auth/registration', {
+      username: username,
+      password: password
+    });
 
   return response.data;
 }
